@@ -35,7 +35,7 @@ var rCmd = &cobra.Command{
 			return fmt.Errorf("%s is directory", file)
 		}
 
-		// csvファイルを取得するためのぽんたを取得
+		// csvファイルを取得するためのポインタを取得
 		filePath, err := os.Open(file)
 		if err != nil {
 			return fmt.Errorf("cannot open file:%s", err.Error())
@@ -46,15 +46,6 @@ var rCmd = &cobra.Command{
 
 		// csvリーダーを作成
 		reader := csv.NewReader(filePath)
-
-		// header, err := reader.Read()
-
-		// if err != nil {
-		// 	fmt.Printf("Error reading CSV header: %s\n", err)
-		// }
-
-		// // ヘッダーを表示
-		// fmt.Println("CSV Header:", header)
 
 		// 行数を取得
 		rows, err := reader.ReadAll()
