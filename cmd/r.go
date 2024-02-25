@@ -1,11 +1,14 @@
 /*
 Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
 import (
+	"encoding/csv"
 	"fmt"
+	"math/rand"
+	"os"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -13,28 +16,65 @@ import (
 // rCmd represents the r command
 var rCmd = &cobra.Command{
 	Use:   "r",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Rondom output",
+	Long:  `Random output of Big Bang Theory titles`,
+	RunE: func(cmd *cobra.Command, args []string) error {
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("r called")
+		// pathの取得
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return fmt.Errorf("cannot get user home dir path:%s", err.Error())
+		}
+
+		// ファイルが取得ができない場合はヘッダーを出力させる
+		file := fmt.Sprintf("%s/.bigbang/title.csv", home)
+		if s, err := os.Stat(file); os.IsNotExist(err) {
+			fmt.Println("index,season,episodes,title")
+			return nil
+		} else if s.IsDir() {
+			return fmt.Errorf("%s is directory", file)
+		}
+
+		// csvファイルを取得するためのぽんたを取得
+		filePath, err := os.Open(file)
+		if err != nil {
+			return fmt.Errorf("cannot open file:%s", err.Error())
+		}
+
+		// 関数の終了時にファイルを閉じる
+		defer filePath.Close()
+
+		// csvリーダーを作成
+		reader := csv.NewReader(filePath)
+
+		// header, err := reader.Read()
+
+		// if err != nil {
+		// 	fmt.Printf("Error reading CSV header: %s\n", err)
+		// }
+
+		// // ヘッダーを表示
+		// fmt.Println("CSV Header:", header)
+
+		// 行数を取得
+		rows, err := reader.ReadAll()
+		if err != nil {
+			fmt.Printf("Error reading CSV rows: %s\n", err)
+		}
+
+		// ランダムなインデックスを生成
+		source := rand.NewSource(time.Now().UnixNano())
+		random := rand.New(source)
+		randomIndex := random.Intn(len(rows))
+
+		// ランダムな行を表示
+		randomRow := rows[randomIndex]
+		fmt.Printf("season%s episodes:%s title:%s\n", randomRow[1], randomRow[2], randomRow[3])
+
+		return nil
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(rCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// rCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// rCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
