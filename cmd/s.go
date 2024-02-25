@@ -58,7 +58,8 @@ var sCmd = &cobra.Command{
 				return fmt.Errorf("cannot read file :%s", err.Error())
 			}
 
-			if len(record) >= 3 && record[1] == season {
+			// 引数と一致するシーズンのレコードのみを出力
+			if record[1] == season {
 				fmt.Printf("season%s episodes:%s title:%s\n", record[1], record[2], record[3])
 			}
 		}
@@ -70,6 +71,7 @@ var sCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(sCmd)
 
+	// フラグの値を変数にバインド
 	sCmd.Flags().StringVarP(&season, "season", "s", "", "select season")
 
 	//必須のフラグに指定
